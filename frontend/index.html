@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Monster Battle Arena</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <h1>* MONSTER BATTLE *</h1>
+  <p id="subtitle">8-BIT ARENA &nbsp;·&nbsp; CO-OP BOSS FIGHT &nbsp;·&nbsp; 1-4 PLAYERS</p>
+
+  <div id="arena-wrap">
+    <canvas id="game-canvas" width="1200" height="800"></canvas>
+
+    <!-- Lobby Overlay -->
+    <div class="overlay" id="lobby-overlay">
+      <h2>&gt; INSERT PLAYER &lt;</h2>
+      <div id="server-input-row">
+        SERVER:
+        <input id="server-url-input" type="text" value="localhost:8000" placeholder="ip:port" />
+      </div>
+      <div id="name-form">
+        <input id="name-input" type="text" maxlength="12" placeholder="ENTER NAME..." autocomplete="off" />
+        <button id="join-btn">[ JOIN GAME ]</button>
+      </div>
+      <div id="lobby-status">WAITING FOR PLAYERS...</div>
+      <div id="lobby-players"></div>
+
+      <!-- Admin-only start button -->
+      <button id="start-btn">[ START GAME ]</button>
+      <div id="admin-note">*** YOU ARE HOST — PRESS START ***</div>
+
+      <!-- Connection instructions -->
+      <div id="connect-info">
+        <strong>HOW OTHERS CONNECT:</strong><br />
+        Open browser and go to<br />
+        <code id="lan-url">http://&lt;your-ip&gt;:8000</code><br />
+        Use the <strong>same SERVER address</strong> &amp; click JOIN.<br />
+        Up to <strong>4 PLAYERS</strong> · Host presses <strong>START GAME</strong>.
+      </div>
+    </div>
+
+    <!-- Game Over Overlay -->
+    <div class="overlay hidden" id="gameover-overlay">
+      <h2 id="gameover-title">---</h2>
+      <p id="gameover-subtext">---</p>
+      <button id="restart-btn">[ PLAY AGAIN ]</button>
+    </div>
+  </div>
+
+  <!-- HUD -->
+  <div id="hud"></div>
+  <div id="controls">WASD &nbsp;MOVE &nbsp;|&nbsp; ARROWS &nbsp;AIM &nbsp;|&nbsp; SPACE / CLICK &nbsp;SHOOT</div>
+
+  <!-- Mobile Controls -->
+  <div id="mobile-controls">
+    <div id="dpad">
+      <div id="btn-up" class="mobile-btn">▲</div>
+      <div id="btn-left" class="mobile-btn">◀</div>
+      <div id="btn-right" class="mobile-btn">▶</div>
+      <div id="btn-down" class="mobile-btn">▼</div>
+    </div>
+    <div id="shoot-wrap">
+      <div id="btn-shoot" class="mobile-btn">FIRE</div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+  <script src="ui.js"></script>
+</body>
+
+</html>
