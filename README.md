@@ -24,7 +24,11 @@ Celebrate the golden era of arcade gaming with **Monster Battle Arena**—a high
 ### The Arena
 ![Gameplay](./assets/gameplay.png)
 *Intense bullet-hell action with real-time HP tracking.*
+
+### The Dragon Phase
 ![Dragon](./assets/dragon.png)
+*The final evolution: Colosseum Dragon.*
+
 ---
 
 ## 🛠️ Installation & Setup
@@ -54,6 +58,7 @@ For deep dives into how the game works, check out our specialized documentation 
 
 - [**Networking & Sockets**](./docs/sockets.txt): Line-by-line breakdown of the WebSocket implementation.
 - [**Game Logic**](./docs/game_logic.txt): Detailed explanation of physics, collisions, and AI phases.
+- [**UI & Canvas Mechanics**](./docs/ui_and_canvas.txt): How the responsive UI and pixel-art renderer work.
 - [**System Overview**](./docs/file.txt): General architecture and protocol details.
 
 ---

@@ -1,0 +1,74 @@
+Monster Battle Arena - UI & Canvas Mechanics Documentation
+=============================================================
+
+This document explains the frontend architecture, focusing on how the UI
+is managed and how the 8-bit graphics are rendered using the HTML5 Canvas.
+
+1. UI Management (`ui.js` & `index.html`)
+-----------------------------------------
+The game uses a hybrid approach: standard HTML/CSS for menus and overlays, 
+and a Canvas for the active gameplay.
+
+*   Responsive Scaling (`rescale` function):
+    - The game arena has a native resolution of 1200x800.
+    - `ui.js` contains a `rescale()` function that calculates a CSS `scale()`
+      transform based on the user's browser window size.
+    - This ensures the 8-bit pixel art stays sharp and centered on any device 
+      (Mobile or Desktop) while maintaining the correct aspect ratio.
+*   Overlays:
+    - `lobby-overlay`: Handles player name input and server connection.
+    - `gameover-overlay`: Displays victory or defeat screens with a "Play Again" 
+      trigger.
+*   HUD (Heads-Up Display):
+    - Managed via `updateHUD()` in `game.js`.
+    - Dynamically generates HTML "cards" for each player to show their health, 
+      color, and connection status.
+
+2. Canvas Rendering (`game.js`)
+-------------------------------
+The `renderLoop` is the heart of the frontend graphics, running at the browser's 
+native refresh rate (usually 60 FPS).
+
+*   Fixed Mapping: 
+    - Coordinates are always calculated against a 1200x800 grid, regardless 
+      of the physical size of the canvas on screen.
+*   Z-Indexing (Layering):
+    - To ensure correct visibility, the loop draws in this order:
+      1. Background (Grid/Floor)
+      2. Monster (The Boss)
+      3. Bullets (Projectiles)
+      4. Players
+      5. Particles (Explosions/Sparks)
+      6. UI Overlays (Text/Phase Flashes)
+
+3. Pixel-Art Sprite System
+--------------------------
+Instead of loading external image files, the game uses a custom "Pixel Sprite" system.
+
+*   `drawPixelSprite`: A helper function that takes an array of strings (a grid) 
+    and a palette mapping. It loops through the grid and uses `ctx.fillRect` 
+    to draw individual 8-bit "pixels."
+*   Scaling: Sprites are drawn with a `scale` factor (usually 4 or 8) to 
+    give them that chunky, retro look.
+
+4. Special Visual Effects
+-------------------------
+*   Particle System: 
+    - Managed in `particles.push()` and `updateParticles()`.
+    - Every spark or explosion is an object with life, velocity, and color.
+    - They use `globalAlpha` to fade out over time.
+*   Screen Shake:
+    - Triggered by `screenShake` variable during intense moments (like boss evolution).
+    - Uses `ctx.translate(shakeX, shakeY)` before drawing to shift the 
+      entire world randomly by a few pixels.
+*   Phase Flashes:
+    - Large text overlays (e.g., "DRAGON AWAKENS!") use a temporary `globalAlpha` 
+      rect to tint the whole screen.
+
+5. Critical Helper Functions
+----------------------------
+*   `drawHealthBar`: A reusable function that draws a pixelated bar above 
+    any entity (Player or Boss). It color-shifts from Green -> Yellow -> Red 
+    as HP drops.
+*   `drawBackground`: Creates the scrolling grid and neon borders that define 
+    the arena's aesthetic.
