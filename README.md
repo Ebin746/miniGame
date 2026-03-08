@@ -24,7 +24,7 @@ Celebrate the golden era of arcade gaming with **Monster Battle Arena**—a high
 ### The Arena
 ![Gameplay](./assets/gameplay.png)
 *Intense bullet-hell action with real-time HP tracking.*
-
+![Dragon](./assets/dragon.png)
 ---
 
 ## 🛠️ Installation & Setup
