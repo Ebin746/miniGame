@@ -1,0 +1,62 @@
+Monster Battle Arena - Game Logic & Mechanics Documentation
+=============================================================
+
+This document provides a detailed overview of the core game logic, physics, 
+and combat mechanics implemented on the authoritative server.
+
+1. Physics & Movement
+---------------------
+The server calculates movement at a fixed rate (30 FPS) to ensure consistency.
+
+*   Player Movement:
+    - Players send directional vectors (`dx`, `dy`) based on their input.
+    - The server normalizes these vectors to prevent "diagonal speed boost."
+    - Final position = `current_pos + (direction * PLAYER_SPEED * dt)`.
+    - Players are constrained within the map boundaries (`MAP_W`, `MAP_H`).
+*   Monster Movement (Autoritative AI):
+    - Initially stationary.
+    - After `MONSTER_MOVE_DELAY` (10s), the monster begins chasing the 
+      nearest alive player.
+    - Movement uses simple vector subtraction to find the direction to the target.
+
+2. Projectile System (Combat)
+-----------------------------
+All combat is projectile-based. Hit detection is calculated on the server.
+
+*   Player Bullets:
+    - Fired toward a target coordinate (aim) or automatically at the monster.
+    - Travel in a straight line at `BULLET_SPEED`.
+    - Collisions are checked against the monster's hit radius.
+    - Each hit reduces `MONSTER_HP` by `PLAYER_BULLET_DMG`.
+*   Monster Bullets:
+    - Initially targeted at individual players with a small random spread.
+    - In the "Dragon" phase, the monster fires a 6-way spread (Dragon Breath).
+    - Each hit reduces `PLAYER_HP` by `MONSTER_BULLET_DMG` (or evolved damage).
+
+3. Monster Evolution & Phases
+-----------------------------
+The game progresses through distinct difficulty phases:
+
+*   Lobby Phase: Waiting for players. Monster is at spawn.
+*   Playing Phase (0s - 10s): Monster is stationary and fires simple shots.
+*   Chase Phase (10s - 20s): Monster starts moving toward players.
+*   Dragon Evolution (20s+):
+    - The monster "evolves," increasing its size (hitbox radius).
+    - Fire rate, bullet speed, and movement speed change.
+    - Attacks transition to multi-projectile "Dragon Breath."
+
+4. Health & Game State
+----------------------
+*   Authoritative Health: The server tracks `hp` for all entities.
+*   Dynamic Difficulty: The monster's max HP scales based on the number 
+    of players: `max(1000, 1000 * num_players)`.
+*   Victory Condition: `MONSTER_HP` reaching 0.
+*   Defeat Condition: All players having their `alive` status set to `False`.
+
+5. Collision Detection
+----------------------
+The server uses simple circle-based collision:
+`distance(bullet, target) < (bullet_radius + target_radius)`
+
+This is efficient for real-time processing and prevents "clipping" through blocks 
+or entities as calculations are done every frame.

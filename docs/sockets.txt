@@ -1,0 +1,56 @@
+Monster Battle Arena - Socket Implementation Details (server.py)
+============================================================
+
+This document breaks down every block of code in `server.py` that interacts 
+with WebSockets, including the line numbers for reference.
+
+1. WebSocket Imports & Global State
+-----------------------------------
+*   Line 15: `from fastapi import FastAPI, WebSocket, WebSocketDisconnect`
+    Importing the necessary classes from FastAPI to handle real-time connections.
+*   Line 72: `connections: Dict[str, WebSocket] = {}`
+    A global dictionary that maps `player_id` (UUID) to the active `WebSocket` 
+    object for broadcasting.
+
+2. Broadcasting Data
+--------------------
+*   Lines 150-160: `async def broadcast(message: dict):`
+    - Line 151: Serializes the dictionary to a JSON string.
+    - Lines 153-155: Iterates through the `connections` dict and uses 
+      `await ws.send_text(payload)` to push the current state to every joined player.
+    - Lines 158-159: Automatically removes "dead" connections that fail to send.
+
+3. The WebSocket Endpoint (Connection Flow)
+-------------------------------------------
+*   Line 356: `@app.websocket("/ws/{player_name}")`
+    The dynamic URL used by the frontend to initiate the connection.
+*   Lines 361-366: Rejection Logic
+    Checks if a game is already in progress or if the lobby is full (`MAX_PLAYERS`) 
+    before accepting the connection.
+*   Line 368: `await websocket.accept()`
+    The "Handshake" — officially upgrading the HTTP connection to a WebSocket.
+*   Line 383: `connections[player_id] = websocket`
+    Stores the socket object for future broadcasts.
+*   Lines 390-394: `await websocket.send_text(...)`
+    Sends a private message to the newly connected player to confirm their 
+    `your_id` and whether they are the `admin_id`.
+
+4. Incoming Message Loop (Receiving)
+------------------------------------
+*   Line 401: `while True:`
+    A continuous loop that stays alive as long as the player is connected.
+*   Line 402: `raw = await websocket.receive_text()`
+    Asynchronously waits for the client to send an action (like "move" or "shoot").
+*   Line 411: Handlers for `mtype == "start_game"`
+*   Line 426: Handlers for `mtype == "move"`
+*   Line 437: Handlers for `mtype == "shoot"`
+
+5. Connection Termination (Cleanup)
+-----------------------------------
+*   Line 463: `except WebSocketDisconnect:`
+    Catches the event when a user closes their browser or loses internet.
+*   Lines 465-506: `finally:` block
+    - Line 467: `connections.pop(player_id, None)`
+      Immediately removes the socket from the broadcast pool.
+    - Lines 487-493: `await broadcast(...)`
+      Informs all other players that someone has left (`type: "player_left"`).

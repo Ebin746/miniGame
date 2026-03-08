@@ -268,10 +268,10 @@ function updateHUD() {
         card.className = 'hud-card';
         const isMe = pid === myId;
         card.innerHTML = `
-      <div class="hud-name" style="color:${p.color}">${isMe ? '>> ' : ''}${p.name.toUpperCase()}</div>
       <div class="hud-bar-bg">
         <div class="hud-bar-fill" style="width:${pct}%;background:${p.alive ? p.color : '#330011'}"></div>
       </div>
+      <div class="hud-name" style="color:${p.color}">${isMe ? '>> ' : ''}${p.name.toUpperCase()}</div>
       <div class="hud-hp-text">${p.alive ? `HP ${p.hp}/${p.max_hp}` : '!! DEAD !!'}</div>
     `;
         hud.appendChild(card);
@@ -623,7 +623,6 @@ function drawOgre(m) {
     ctx.fillRect(-18, 44, 14, 8); ctx.fillRect(4, 44, 14, 8);
 
     ctx.restore();
-    drawHealthBar(x, y + bobY + 70, 130, m.hp, m.max_hp, '#ff2244', `HP ${m.hp}/${m.max_hp}`);
 
     const ragePct = 1 - (m.hp / m.max_hp);
     if (ragePct > 0.5) {
@@ -846,9 +845,6 @@ function drawDragon(m) {
 
     ctx.restore();
 
-    // ── Health bar (wider for dragon) ──
-    drawHealthBar(x, y + bobY + 100, 180, m.hp, m.max_hp, '#cc00ff', `HP ${m.hp}/${m.max_hp}`);
-
     // Dragon name tag
     ctx.save();
     ctx.font = 'bold 9px "Press Start 2P", monospace';
@@ -862,6 +858,46 @@ function drawDragon(m) {
 
 // ── Player sprite (8-bit hero) ──
 // Pixel-art player character — uses player color
+function drawBossHUD(m) {
+    if (!m || !m.alive) return;
+    const padding = 100;
+    const barW = MAP_W - padding * 2;
+    const barH = 20;
+    const x = padding;
+    const y = 35;
+
+    ctx.save();
+    // Shadow/Black background
+    ctx.fillStyle = 'rgba(0,0,0,0.85)';
+    ctx.fillRect(x - 4, y - 4, barW + 8, barH + 8);
+
+    // Border based on phase
+    ctx.strokeStyle = m.evolved ? '#cc00ff' : '#ff2244';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(x - 4, y - 4, barW + 8, barH + 8);
+
+    // Background fill
+    ctx.fillStyle = '#1a0008';
+    ctx.fillRect(x, y, barW, barH);
+
+    // HP Bar
+    const pct = Math.max(0, m.hp / m.max_hp);
+    const hue = m.evolved ? '#cc00ff' : (pct > 0.5 ? '#00ff66' : pct > 0.25 ? '#ffdd00' : '#ff2244');
+    ctx.fillStyle = hue;
+    ctx.fillRect(x, y, barW * pct, barH);
+
+    // Boss Name
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 11px "Press Start 2P", monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = '#000';
+    ctx.shadowBlur = 4;
+    const bossName = m.evolved ? '!!! COLOSSEUM DRAGON !!!' : '--- ANCIENT OGRE ---';
+    ctx.fillText(bossName, MAP_W / 2, y + barH / 2);
+    ctx.restore();
+}
+
 function drawPlayerPixels(x, y, color, isMe, scale = 4) {
     const S = scale;
     ctx.save();
@@ -976,7 +1012,7 @@ function drawPlayer(p, isMe) {
     ctx.fillText(nameTag, x, y - 46);
     ctx.restore();
 
-    drawHealthBar(x, y + 28, 48, p.hp, p.max_hp, color);
+    drawHealthBar(x, y - 38, 48, p.hp, p.max_hp, color);
 }
 
 function drawAimIndicator(p) {
@@ -1147,6 +1183,7 @@ function renderLoop(ts) {
 
     if (gameState && (phase === 'playing' || phase === 'gameover')) {
         drawMonster(gameState.monster);
+        drawBossHUD(gameState.monster);
 
         for (const b of gameState.bullets) drawBullet(b);
 

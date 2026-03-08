@@ -40,9 +40,9 @@ MAX_PLAYERS        = 4
 MONSTER_MOVE_DELAY        = 10.0  # seconds until monster starts moving
 MONSTER_EVOLVE_DELAY      = 20.0  # seconds until monster evolves
 MONSTER_MOVE_SPEED        = 80    # px/sec during movement phase
-MONSTER_EVOLVED_SPEED     = 220   # px/sec after evolution
-MONSTER_EVOLVED_FIRE_INT  = 0.25  # fire interval after evolution
-MONSTER_EVOLVED_BULLET_SPD = 600  # bullet speed after evolution
+MONSTER_EVOLVED_SPEED     = 110   # px/sec after evolution
+MONSTER_EVOLVED_FIRE_INT  = 0.5   # fire interval after evolution
+MONSTER_EVOLVED_BULLET_SPD = 300  # bullet speed after evolution
 MONSTER_EVOLVED_BULLET_DMG = 40   # damage per bullet after evolution
 
 SPAWN_POSITIONS = [

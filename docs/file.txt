@@ -1,0 +1,68 @@
+Monster Battle Arena - Networking & Session Documentation
+=========================================================
+
+This document explains the networking architecture, protocol, and session management
+of the Monster Battle Arena game.
+
+1. Socket Involvement
+---------------------
+The game uses WebSockets for real-time, bidirectional communication between the 
+client (frontend) and the server (backend). 
+
+*   Where: The WebSocket endpoint is hosted at `/ws/{player_name}` on the FastAPI server.
+*   Why: WebSockets are essential for this type of fast-paced game because they allow:
+    - Low-latency data transmission.
+    - The server to push state updates to all clients instantly.
+    - Continuous bidirectional communication (unlike HTTP which is request-response).
+
+2. Protocol
+-----------
+*   Underlying Protocol: WebSocket (RFC 6455) running over TCP.
+*   Message Format: JSON (JavaScript Object Notation). All data packets are 
+    serialized as JSON strings.
+*   Communication Flow:
+    - Client -> Server: Sends input events like "move" (directional vectors) 
+      and "shoot" (aim coordinates or auto-aim flags).
+    - Server -> Client: Broadcasts the authoritative "game_state" approximately 
+      30 times per second (30 FPS). This includes positions, HP, and bullet data for 
+      all entities in the game.
+
+3. Session Management
+---------------------
+The server maintains a robust session handling system to manage players and game states.
+
+*   Player Identification:
+    - Each player is assigned a unique UUID (Universally Unique Identifier) upon connection.
+    - This `player_id` is used to track the player's entity in the `game_state`.
+*   Connection Handling:
+    - The server uses a dictionary (`connections`) to map `player_id` to the 
+      active WebSocket object.
+    - When a player joins, they are added to the `players` dictionary in the `game_state`.
+*   Admin Role:
+    - The first player to join the session is automatically designated as the ADMIN.
+    - Only the ADMIN has the authority to start the game from the lobby or restart 
+      it after a gameover.
+*   Authoritative Server Logic (The "Brain"):
+    - The server is the "Single Source of Truth." It calculates all movements, 
+      collisions, and damage.
+    - The client is a "dumb" renderer that simply displays the state provided by 
+      the server.
+*   Disconnection and Cleanup:
+    - If a WebSocket connection is lost, the server automatically cleans up the 
+      associated `player_id` from the `connections` and `game_state`.
+    - If the ADMIN leaves, the role is automatically reassigned to the next 
+      available player.
+    - If all players leave, the lobby and game state are reset to the initial values.
+
+4. Server Workflow Summary
+--------------------------
+1. Wait for player connections in the "lobby" phase.
+2. ADMIN triggers "start_game".
+3. Server starts a background `game_loop` task (asyncio).
+4. Every 1/30th of a second, the server:
+   - Processes accumulated client inputs.
+   - Updates entity positions and physics.
+   - Checks for collisions (bullets vs players/monster).
+   - Generates monster attacks.
+   - Broadcasts the new `state_snapshot` to all connected clients.
+5. If victory/defeat conditions are met, the phase transitions to "gameover".
